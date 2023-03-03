@@ -11,11 +11,12 @@ struct ContentView: View {
     @State private var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Russia", "Spain", "UK", "US"].shuffled()
     @State private var correctAnswer = Int.random(in: 0...2)
     
-    @State private var showingScore = false
+    @State private var showingAlert = false
     @State private var scoreTitle = ""
     
     @State private var scoreC = 0
     @State private var scoreW = 0
+    @State private var gameLevel = 0
     
     var body: some View {
         ZStack {
@@ -28,6 +29,9 @@ struct ContentView: View {
                 Spacer()
                 VStack{
                     Text("BAYRAĞI BUL")
+                        .font(.largeTitle.weight(.bold))
+                        .foregroundColor(Color(red: 0.1, green: 0.2, blue: 0.45))
+                    Text("\(gameLevel) / 3")
                         .font(.largeTitle.weight(.bold))
                         .foregroundColor(Color(red: 0.1, green: 0.2, blue: 0.45))
                 }
@@ -46,7 +50,6 @@ struct ContentView: View {
                     ForEach (0..<3) { number in
                         Button {
                             flagTapped(number)
-                            askQuestion()
                         } label: {
                             Image(countries[number])
                                 .renderingMode(.original)
@@ -74,34 +77,46 @@ struct ContentView: View {
                         .clipShape(Capsule())
                         .shadow(radius: 5)
                 }
-                Text ("SCORE : \(scoreC - scoreW)")
+                Text ("SCORE : \((scoreC - scoreW)*100)")
                     .padding(.all)
                     .foregroundColor(.white)
                     .background(Color(.systemGray))
                     .clipShape(Capsule())
                     .shadow(radius: 5)
             }
-            
-            //            .alert(scoreTitle, isPresented: $showingScore) {
-            //                Button("Continue", action: askQuestion)
-            //            } message: {
-            //                Text ("Your score is \(scoreC - scoreW)")
-            //            }
+                        .alert(scoreTitle, isPresented: $showingAlert) {
+                            Button("OK", action: askQuestion)
+                        }
         }
     }
     func flagTapped (_ number: Int) {
         if number == correctAnswer {
-            scoreTitle = "Correct"
+            scoreTitle = "Doğru"
             scoreC += 1
+            gameLevel += 1
+            askQuestion()
         } else {
-            scoreTitle = "Wrong"
+            showingAlert = true
+            scoreTitle = "Seçtiğin bayrak '\(countries[number])'"
             scoreW += 1
+            gameLevel += 1
         }
-        showingScore = true
     }
     func askQuestion() {
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+        
+        if gameLevel >= 3 {
+            showingAlert = true
+            scoreTitle = "Oyun Bitti Skorunuz \((scoreC - scoreW)*100)"
+            restart()
+        }
+    }
+    func restart(){
+        scoreW = 0
+        scoreC = 0
+        gameLevel = 0
+        askQuestion()
     }
 }
 
