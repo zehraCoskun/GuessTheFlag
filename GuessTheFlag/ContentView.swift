@@ -7,6 +7,29 @@
 
 import SwiftUI
 
+struct FlagImage: View {
+    var countries : [String]
+    var number : Int
+    var body: some View {
+        Image(countries[number])
+            .renderingMode(.original)
+            .shadow(radius: 5)
+            .cornerRadius(20)
+    }
+}
+struct LargeBlueTitle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.largeTitle.weight(.bold))
+            .foregroundColor(Color(red: 0.1, green: 0.2, blue: 0.45))
+    }
+}
+extension View {
+    func largeBlueTitle() -> some View{
+        modifier(LargeBlueTitle())
+    }
+}
+
 struct ContentView: View {
     @State private var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Russia", "Spain", "UK", "US"].shuffled()
     @State private var correctAnswer = Int.random(in: 0...2)
@@ -29,17 +52,14 @@ struct ContentView: View {
                 Spacer()
                 VStack{
                     Text("BAYRAĞI BUL")
-                        .font(.largeTitle.weight(.bold))
-                        .foregroundColor(Color(red: 0.1, green: 0.2, blue: 0.45))
+                        .largeBlueTitle()
                     Text("\(gameLevel) / 3")
-                        .font(.largeTitle.weight(.bold))
-                        .foregroundColor(Color(red: 0.1, green: 0.2, blue: 0.45))
+                        .largeBlueTitle()
                 }
                 Spacer()
                 VStack{
                     Text(countries[correctAnswer])
-                        .font(.largeTitle.weight(.bold))
-                        .foregroundColor(Color(red: 0.1, green: 0.2, blue: 0.45))
+                        .largeBlueTitle()
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 20)
@@ -51,10 +71,7 @@ struct ContentView: View {
                         Button {
                             flagTapped(number)
                         } label: {
-                            Image(countries[number])
-                                .renderingMode(.original)
-                                .shadow(radius: 5)
-                                .cornerRadius(20)
+                            FlagImage(countries: countries, number: number)
                         }
                     }
                 }
