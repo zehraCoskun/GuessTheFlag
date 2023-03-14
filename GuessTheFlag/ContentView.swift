@@ -7,16 +7,17 @@
 
 import SwiftUI
 
-struct FlagImage: View {
-    var countries : [String]
-    var number : Int
-    var body: some View {
-        Image(countries[number])
-            .renderingMode(.original)
-            .shadow(radius: 5)
-            .cornerRadius(20)
-    }
-}
+//struct FlagImage: View {
+//
+//    var countries : [String]
+//    var number : Int
+//    var body: some View {
+//        Image(countries[number])
+//            .renderingMode(.original)
+//            .shadow(radius: 5)
+//            .cornerRadius(20)
+//    }
+//}
 struct LargeBlueTitle: ViewModifier {
     func body(content: Content) -> some View {
         content
@@ -41,6 +42,8 @@ struct ContentView: View {
     @State private var scoreW = 0
     @State private var gameLevel = 0
     
+    @State private var selectedFlag = -1
+    
     var body: some View {
         ZStack {
             RadialGradient(stops: [
@@ -53,7 +56,7 @@ struct ContentView: View {
                 VStack{
                     Text("BAYRAĞI BUL")
                         .largeBlueTitle()
-                    Text("\(gameLevel) / 3")
+                    Text("\(gameLevel) / 10")
                         .largeBlueTitle()
                 }
                 Spacer()
@@ -71,7 +74,14 @@ struct ContentView: View {
                         Button {
                             flagTapped(number)
                         } label: {
-                            FlagImage(countries: countries, number: number)
+                            Image(countries[number])
+                                .renderingMode(.original)
+                                .shadow(radius: 5)
+                                .cornerRadius(20)
+                                .rotation3DEffect(.degrees(number == selectedFlag ? 360 : 0), axis: (x: 0, y: 1, z: 0))
+                                .animation(.default, value: selectedFlag)
+                                .opacity(selectedFlag == -1 || selectedFlag == number ? 1.0 : 0.25)
+                                .scaleEffect(selectedFlag == -1 || selectedFlag == number ? 1 : 0.5)
                         }
                     }
                 }
@@ -79,6 +89,8 @@ struct ContentView: View {
                 .padding(.vertical, 20)
                 .background(.regularMaterial)
                 .clipShape(RoundedRectangle(cornerRadius: 50))
+                .animation(.default, value: selectedFlag)
+                
                 
                 HStack {
                     Text("Doğru Sayısı : \(scoreC)")
@@ -107,28 +119,35 @@ struct ContentView: View {
         }
     }
     func flagTapped (_ number: Int) {
+        
         if number == correctAnswer {
+            showingAlert = true
             scoreTitle = "Doğru"
             scoreC += 1
             gameLevel += 1
-            askQuestion()
+            selectedFlag = number
+            
         } else {
             showingAlert = true
             scoreTitle = "Seçtiğin bayrak '\(countries[number])'"
             scoreW += 1
             gameLevel += 1
         }
+        
     }
     func askQuestion() {
         countries.shuffle()
-        correctAnswer = Int.random(in: 0...2)
         
-        if gameLevel >= 3 {
+        correctAnswer = Int.random(in: 0...2)
+        selectedFlag = -1
+        if gameLevel >= 10 {
             showingAlert = true
             scoreTitle = "Oyun Bitti Skorunuz \((scoreC - scoreW)*100)"
             restart()
         }
     }
+    
+
     func restart(){
         scoreW = 0
         scoreC = 0
